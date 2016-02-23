@@ -1,0 +1,18 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="nl.s132054.materialdesigntest.Cards">
+    <item
+        android:id="@+id/action_settings"
+        android:orderInCategory="100"
+        android:title="@string/action_settings"
+        android:icon="@drawable/dogeshroom"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_app_name"
+        android:orderInCategory="100"
+        android:title="@string/app_name"
+        android:icon="@mipmap/ic_launcher"
+        app:showAsAction="always" />
+</menu>
