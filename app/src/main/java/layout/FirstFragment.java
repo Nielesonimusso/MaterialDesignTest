@@ -1,15 +1,30 @@
 package layout;
 
 import android.content.Context;
+import android.database.DataSetObserver;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.RecyclerView.ItemDecoration;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Adapter;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import java.io.InputStream;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import nl.s132054.materialdesigntest.R;
 
@@ -78,25 +93,93 @@ public class FirstFragment extends Fragment {
         }
     }
 
+    class RecyclerCardAdapter extends RecyclerView.Adapter<RecyclerCardAdapter.ViewHolder> {
+
+        List<RecyclerCardAdapter.ViewHolder> cards = new ArrayList<>();
+        private String[] items;
+
+        RecyclerCardAdapter(String[] items) {
+            this.items = items;
+        }
+
+        @Override
+        public RecyclerCardAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+
+            CardView cardView = (CardView) LayoutInflater.from(parent.getContext()).inflate(R.layout.recycle_card, parent, false);
+            ImageView imageView = (ImageView) cardView.getChildAt(0);
+            TextView textView = (TextView) cardView.getChildAt(1);
+            return new ViewHolder(cardView, textView, imageView);
+        }
+
+        @Override
+        public void onBindViewHolder(RecyclerCardAdapter.ViewHolder holder, int position) {
+            holder.text.setText(items[position]);
+            new ImageTask(holder.image).execute(items[position]);
+        }
+
+        @Override
+        public int getItemCount() {
+            return items.length;
+        }
+
+        class ImageTask extends AsyncTask<String, Void, Bitmap> {
+
+            ImageView imageView;
+
+            ImageTask(ImageView img) {
+                imageView = img;
+            }
+
+            @Override
+            protected Bitmap doInBackground(String... params) {
+                String url = params[0];
+                Bitmap result = null;
+                try {
+                    InputStream in = new URL(url).openStream();
+                    result = BitmapFactory.decodeStream(in);
+                } catch (Exception e) {
+                    Log.e("Error", e.getMessage());
+                    e.printStackTrace();
+                }
+                return result;
+            }
+
+            @Override
+            protected void onPostExecute(Bitmap bitmap) {
+                imageView.setImageBitmap(bitmap);
+            }
+        }
+
+        class ViewHolder extends RecyclerView.ViewHolder{
+
+            CardView card;
+            TextView text;
+            ImageView image;
+
+            public ViewHolder(CardView itemView, TextView text, ImageView image) {
+                super(itemView);
+                this.card = itemView;
+                this.text = text;
+                this.image = image;
+            }
+        }
+    }
+
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        LinearLayout linearLayout = (LinearLayout) this.getActivity().findViewById(R.id.layout_content_cards);
+        RecyclerView recyclerView = (RecyclerView) this.getActivity().findViewById(R.id.layout_content_cards);
 
-        CardView[] cardViews = new CardView[5];
-        for (int i = 0; i < cardViews.length; i++) {
-            cardViews[i] = new CardView(this.getContext());
-            cardViews[i].setRadius(5.0f);
-            cardViews[i].setCardElevation(5.0f);
-            cardViews[i].setUseCompatPadding(true);
-            cardViews[i].setContentPadding(10, 10, 10, 10);
-            cardViews[i].setShadowPadding(20, 20, 20, 20);
-            cardViews[i].setMinimumHeight(500);
-            TextView textView = new TextView(this.getContext());
-            textView.setText(String.valueOf(i));
-            cardViews[i].addView(textView);
-            linearLayout.addView(cardViews[i]);
-        }
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
+        //linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        recyclerView.setLayoutManager(linearLayoutManager);
+
+        String[] items = new String[]{"http://s4.evcdn.com/images/block250/I0-001/016/304/559-0.jpeg_/massive-attack-59.jpeg",
+                "http://s3.evcdn.com/images/block250/I0-001/000/273/446-5.jpg_/muse-46.jpg",
+                "http://s3.evcdn.com/images/block250/I0-001/004/242/482-9.jpeg_/adele-82.jpeg"};
+
+        RecyclerCardAdapter recyclerCardAdapter = new RecyclerCardAdapter(items);
+        recyclerView.setAdapter(recyclerCardAdapter);
     }
 
     @Override

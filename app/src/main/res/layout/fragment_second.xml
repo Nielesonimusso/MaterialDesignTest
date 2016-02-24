@@ -1,14 +1,8 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ImageView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="nl.s132054.materialdesigntest.SecondFragment">
-
-    <!-- TODO: Update blank fragment layout -->
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="25dp"
-        android:src="@drawable/dogeshroom"/>
-
-</FrameLayout>
+    tools:context="nl.s132054.materialdesigntest.SecondFragment"
+    android:layout_margin="25dp"
+    android:src="@drawable/dogeshroom"/>
