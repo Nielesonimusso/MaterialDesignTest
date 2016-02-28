@@ -1,9 +1,34 @@
-<ImageView
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="nl.s132054.materialdesigntest.SecondFragment"
-    android:layout_margin="25dp"
-    android:src="@drawable/dogeshroom"/>
-
+    android:layout_width="match_parent"
+    android:orientation="vertical">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <EditText
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:id="@+id/FireBaseInput"
+            android:hint="Text you want to display"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/FireBaseButton"
+            android:text="change"/>
+    </LinearLayout>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/FireBaseText"
+        android:text=""/>
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:context="nl.s132054.materialdesigntest.SecondFragment"
+        android:layout_margin="25dp"
+        android:src="@drawable/dogeshroom"/>
+</LinearLayout>

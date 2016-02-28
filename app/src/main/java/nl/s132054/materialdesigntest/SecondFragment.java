@@ -1,5 +1,7 @@
 package nl.s132054.materialdesigntest;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
@@ -7,7 +9,11 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 
+import com.firebase.client.*;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -17,7 +23,7 @@ import android.view.ViewGroup;
  * Use the {@link SecondFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class SecondFragment extends Fragment {
+public class SecondFragment extends Fragment implements View.OnClickListener, ValueEventListener {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -26,6 +32,10 @@ public class SecondFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
+    private Firebase firebase;
+    private Button button;
+    private String account;
 
     private OnFragmentInteractionListener mListener;
 
@@ -65,6 +75,7 @@ public class SecondFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_second, container, false);
+
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -72,6 +83,17 @@ public class SecondFragment extends Fragment {
         if (mListener != null) {
             mListener.onFragmentInteraction(uri);
         }
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        Firebase.setAndroidContext(getActivity());
+        account = AccountManager.get(getContext()).getAccountsByType("com.google")[0].name.replace('.', '_');
+        firebase = new Firebase("https://flickering-heat-9387.firebaseio.com/");
+        firebase.child(account).addValueEventListener(this);
+        button = (Button) getActivity().findViewById(R.id.FireBaseButton);
+        button.setOnClickListener(this);
     }
 
     @Override
@@ -89,6 +111,27 @@ public class SecondFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    @Override
+    public void onClick(View v) {
+        if (v.equals(button)) {
+            EditText editText = (EditText) getActivity().findViewById(R.id.FireBaseInput);
+            String text = editText.getText().toString();
+            firebase.child(account).setValue(text);
+        }
+    }
+
+    @Override
+    public void onDataChange(DataSnapshot dataSnapshot) {
+        TextView textView = (TextView) getActivity().findViewById(R.id.FireBaseText);
+        String value = dataSnapshot.getValue() ==  null ? "" : dataSnapshot.getValue().toString();
+        textView.setText(value);
+    }
+
+    @Override
+    public void onCancelled(FirebaseError firebaseError) {
+
     }
 
     /**

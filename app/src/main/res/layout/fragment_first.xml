@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/layout_content_cards"
-        tools:context="layout.FirstFragment">
+        tools:context=".FirstFragment">
     </android.support.v7.widget.RecyclerView>
 </android.support.design.widget.CoordinatorLayout>
 <!--
