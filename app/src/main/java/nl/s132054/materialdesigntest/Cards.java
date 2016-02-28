@@ -1,5 +1,7 @@
 package nl.s132054.materialdesigntest;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -56,19 +58,12 @@ public class Cards extends AppCompatActivity implements FirstFragment.OnFragment
 
         dialogFragment = new TestDialogFragment();
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "How do you do?", Snackbar.LENGTH_LONG)
-                        .setAction("DO it wrong!", new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                dialogFragment.show(getFragmentManager(), "potato");
-                            }
-                        }).show();
-            }
-        });
+        Account[] accounts = AccountManager.get(this).getAccountsByType("com.google");
+        System.out.println(accounts.length);
+        for (Account a : accounts) {
+            System.out.println(a.name);
+        }
+        String id = accounts[0].name;
     }
 
     @Override
@@ -87,10 +82,8 @@ public class Cards extends AppCompatActivity implements FirstFragment.OnFragment
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            System.out.println("BLA");
-            return true;
+            dialogFragment.show(getFragmentManager(), "question");
         } else if (id ==  R.id.action_app_name) {
-            System.out.println("BLUHH");
         }
 
         return super.onOptionsItemSelected(item);

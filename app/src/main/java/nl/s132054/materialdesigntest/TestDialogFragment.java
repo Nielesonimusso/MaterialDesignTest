@@ -15,21 +15,21 @@ public class TestDialogFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle("Something is off here!")
+        builder.setTitle("How many panes do you want to add?")
                 .setMessage("What should we do?")
-                .setPositiveButton("SOMETHING", new DialogInterface.OnClickListener() {
+                .setPositiveButton("10", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
                     }
                 })
-                .setNeutralButton("Don't care", new DialogInterface.OnClickListener() {
+                .setNeutralButton("1", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
                     }
                 })
-                .setNegativeButton("Nothing", new DialogInterface.OnClickListener() {
+                .setNegativeButton("None", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.cancel();

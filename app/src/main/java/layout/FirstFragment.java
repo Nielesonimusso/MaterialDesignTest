@@ -7,6 +7,8 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
@@ -21,9 +23,13 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import nl.s132054.materialdesigntest.R;
@@ -93,13 +99,20 @@ public class FirstFragment extends Fragment {
         }
     }
 
+    class BitmapCache {
+        Bitmap cached;
+    }
+
     class RecyclerCardAdapter extends RecyclerView.Adapter<RecyclerCardAdapter.ViewHolder> {
 
         List<RecyclerCardAdapter.ViewHolder> cards = new ArrayList<>();
-        private String[] items;
+        private ArrayList<String> items;
+        private HashMap<Integer, BitmapCache> cache;
 
         RecyclerCardAdapter(String[] items) {
-            this.items = items;
+            this.items = new ArrayList<>();
+            Collections.addAll(this.items, items);
+            cache = new HashMap<>();
         }
 
         @Override
@@ -113,21 +126,41 @@ public class FirstFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(RecyclerCardAdapter.ViewHolder holder, int position) {
-            holder.text.setText(items[position]);
-            new ImageTask(holder.image).execute(items[position]);
+            holder.text.setText(items.get(position));
+            if (!cache.containsKey(position)) {
+                BitmapCache bitmapCache = new BitmapCache();
+                cache.put(position, bitmapCache);
+                ImageTask imageTask = new ImageTask(holder.image, bitmapCache);
+                imageTask.execute(items.get(position));
+            } else {
+                holder.image.setImageBitmap(cache.get(position).cached);
+            }
         }
 
         @Override
         public int getItemCount() {
-            return items.length;
+            return items.size();
+        }
+
+        public void addItem(String item) {
+            items.add(item);
+            notifyItemChanged(getItemCount() - 1);
+
+        }
+
+        public void removeLastItem() {
+            items.remove(items.size() - 1);
+            notifyItemChanged(getItemCount());
         }
 
         class ImageTask extends AsyncTask<String, Void, Bitmap> {
 
             ImageView imageView;
+            BitmapCache bitmapCache;
 
-            ImageTask(ImageView img) {
+            ImageTask(ImageView img, BitmapCache cache) {
                 imageView = img;
+                bitmapCache = cache;
             }
 
             @Override
@@ -137,8 +170,7 @@ public class FirstFragment extends Fragment {
                 try {
                     InputStream in = new URL(url).openStream();
                     result = BitmapFactory.decodeStream(in);
-                } catch (Exception e) {
-                    Log.e("Error", e.getMessage());
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
                 return result;
@@ -146,7 +178,12 @@ public class FirstFragment extends Fragment {
 
             @Override
             protected void onPostExecute(Bitmap bitmap) {
-                imageView.setImageBitmap(bitmap);
+                bitmapCache.cached = bitmap.copy(Bitmap.Config.ARGB_8888, false);
+                if (bitmap == null) {
+                    imageView.setImageResource(R.drawable.notfound);
+                } else {
+                    imageView.setImageBitmap(bitmap);
+                }
             }
         }
 
@@ -178,8 +215,23 @@ public class FirstFragment extends Fragment {
                 "http://s3.evcdn.com/images/block250/I0-001/000/273/446-5.jpg_/muse-46.jpg",
                 "http://s3.evcdn.com/images/block250/I0-001/004/242/482-9.jpeg_/adele-82.jpeg"};
 
-        RecyclerCardAdapter recyclerCardAdapter = new RecyclerCardAdapter(items);
+        final RecyclerCardAdapter recyclerCardAdapter = new RecyclerCardAdapter(items);
         recyclerView.setAdapter(recyclerCardAdapter);
+
+        FloatingActionButton fab = (FloatingActionButton) this.getActivity().findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                recyclerCardAdapter.addItem("http://dummyimage.com/600x400/ffffff/aaaaaa.png&text=" + String.valueOf(recyclerCardAdapter.getItemCount()));
+                Snackbar.make(view, "Item added", Snackbar.LENGTH_LONG)
+                        .setAction("undo", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                recyclerCardAdapter.removeLastItem();
+                            }
+                        }).show();
+            }
+        });
     }
 
     @Override
