@@ -4,6 +4,7 @@ import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.content.Context;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -14,6 +15,14 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.firebase.client.*;
+import com.firebase.client.utilities.Base64;
+
+import java.io.BufferedInputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Scanner;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -88,12 +97,46 @@ public class SecondFragment extends Fragment implements View.OnClickListener, Va
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        button = (Button) getActivity().findViewById(R.id.FireBaseButton);
+
         Firebase.setAndroidContext(getActivity());
         account = AccountManager.get(getContext()).getAccountsByType("com.google")[0].name.replace('.', '_');
-        firebase = new Firebase("https://flickering-heat-9387.firebaseio.com/");
-        firebase.child(account).addValueEventListener(this);
-        button = (Button) getActivity().findViewById(R.id.FireBaseButton);
-        button.setOnClickListener(this);
+        new AsyncTask<String, Void, String>() {
+
+            @Override
+            protected String doInBackground(String... params) {
+                String token = "";
+                try {
+                    String accountstr = params[0];
+                    URL tokenURL = new URL("http://niels.xyz/DBLAPPDEV/key.php?in="+accountstr);
+                    HttpURLConnection httpURLConnection = (HttpURLConnection) tokenURL.openConnection();
+                    httpURLConnection.setDoInput(true);
+                    httpURLConnection.setChunkedStreamingMode(0);
+                    Scanner scanner = new Scanner(httpURLConnection.getInputStream());
+                    token = scanner.nextLine();
+                } catch (java.io.IOException e) { }
+                return token;
+            }
+
+            @Override
+            protected void onPostExecute(String token) {
+                firebase = new Firebase("https://flickering-heat-9387.firebaseio.com/");
+                super.onPostExecute(token);
+                firebase.authWithCustomToken(token, new Firebase.AuthResultHandler() {
+                    @Override
+                    public void onAuthenticated(AuthData authData) {
+                        firebase.child("users").child(account).addValueEventListener(SecondFragment.this);
+                        button.setOnClickListener(SecondFragment.this);
+                    }
+
+                    @Override
+                    public void onAuthenticationError(FirebaseError firebaseError) {
+                        firebaseError.toException().printStackTrace();
+                    }
+                });
+                System.out.println("authenticated");
+            }
+        }.execute(account);
     }
 
     @Override
@@ -118,7 +161,7 @@ public class SecondFragment extends Fragment implements View.OnClickListener, Va
         if (v.equals(button)) {
             EditText editText = (EditText) getActivity().findViewById(R.id.FireBaseInput);
             String text = editText.getText().toString();
-            firebase.child(account).setValue(text);
+            firebase.child("users").child(account).setValue(text);
         }
     }
 
