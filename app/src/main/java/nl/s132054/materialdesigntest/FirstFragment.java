@@ -102,7 +102,7 @@ public class FirstFragment extends Fragment {
         private HashMap<Integer, BitmapCache> cache;
 
         RecyclerCardAdapter(String[] items) {
-            this.items = new ArrayList<>();
+            this.items = new ArrayList<String>();
             Collections.addAll(this.items, items);
             cache = new HashMap<>();
         }
