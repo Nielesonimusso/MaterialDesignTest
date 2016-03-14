@@ -35,6 +35,7 @@ public class TestDialogFragment extends DialogFragment {
                         dialog.cancel();
                     }
                 });
+
         return builder.create();
     }
 }
